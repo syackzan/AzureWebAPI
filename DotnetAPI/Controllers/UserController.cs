@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DotnetAPI.Controllers;
@@ -7,18 +8,36 @@ namespace DotnetAPI.Controllers;
 public class UserController : ControllerBase
 {
 
-    public UserController()
+    private readonly DataContextDapper _dapper;
+    public UserController(IConfiguration config)
     {
-    
+        //Console.WriteLine(config.GetConnectionString("DefaultConnection"));
+        _dapper = new DataContextDapper(config);
+    }
+
+    [HttpGet("TestConnection")]
+    public DateTime TestConnection()
+    {
+        return _dapper.LoadDataSingle<DateTime>("SELECT GETDATE()");
     }
 
     //This will set up /User/GetUsers
-    [HttpGet("GetUsers/{testValue}")]
-
+    [HttpGet("GetUsers")]
     //public IEnumerable<User> GetUsers()
-    public string[] GetUsers(string testValue)
-    {
-        return new string[] {"user1", "user2", testValue};
+    public IEnumerable<User> GetUsers()
+    {   
+        string sql = @"
+        SELECT  [UserId]
+            , [FirstName]
+            , [LastName]
+            , [Email]
+            , [Gender]
+            , [Active]
+         FROM  TutorialAppSchema.Users";
+
+         IEnumerable<User> users = _dapper.LoadData<User>(sql);
+
+        return users;
 
         // return Enumerable.Range(1, 5).Select(index => new WeatherForecast
         // {
@@ -28,4 +47,12 @@ public class UserController : ControllerBase
         // })
         // .ToArray();
     }
+
+    [HttpGet("GetSingleUser/{userId}")]
+
+    public User GetSingleUser(){
+        return _dapper.LoadDataSingle<User>("SELECT * FROM TUTORIALAPPSCHEMA WHERE ");
+    }
+
+
 }
