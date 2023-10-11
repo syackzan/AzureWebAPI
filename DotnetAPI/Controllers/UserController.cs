@@ -50,8 +50,58 @@ public class UserController : ControllerBase
 
     [HttpGet("GetSingleUser/{userId}")]
 
-    public User GetSingleUser(){
-        return _dapper.LoadDataSingle<User>("SELECT * FROM TUTORIALAPPSCHEMA WHERE ");
+    public User GetSingleUser(int userId){
+        return _dapper.LoadDataSingle<User>("SELECT * FROM TutorialAppSchema.Users WHERE UserId = " + userId.ToString());
+    }
+
+    [HttpPut("EditUser")]
+    public IActionResult EditUser(User user)
+    {
+        string sql = @"
+        UPDATE TutorialAppSchema.Users
+            SET [FirstName] = '" + user.FirstName + 
+            "', [LastName] = '" + user.LastName + 
+            "', [Email] = '" + user.Email +
+            "', [Gender] = '"  + user.Gender +
+            "', [Active] = '" + user.Active + 
+            "' WHERE UserId = " + user.UserId;
+        Console.WriteLine(sql);
+        if(_dapper.ExecuteSql(sql))
+        {
+            return Ok();
+        }
+
+        throw new Exception("Failed To Update User");
+    }
+
+    [HttpPost("AddUser")]
+    public IActionResult AddUser(UserToAddDto user)
+    {
+        string sql = @"
+        INSERT INTO TutorialAppSchema.Users(
+            [FirstName],
+            [LastName],
+            [Email],
+            [Gender],
+            [Active]
+        ) 
+        VALUES 
+        (" +
+            "'" + user.FirstName + 
+            "', '" + user.LastName + 
+            "', '" + user.Email +
+            "', '"  + user.Gender +
+            "', '" + user.Active + 
+        "')";
+
+        Console.WriteLine(sql);
+
+        if(_dapper.ExecuteSql(sql))
+        {
+            return Ok();
+        }
+
+        throw new Exception("Failed to Add User");
     }
 
 
