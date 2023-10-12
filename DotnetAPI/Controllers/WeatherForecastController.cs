@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using DotnetAPI.Models;
 
 namespace DotnetAPI.Controllers;
 
